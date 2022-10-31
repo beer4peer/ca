@@ -6,6 +6,7 @@ It is envisaged that each vote will be signed by an intermediate cert, or a shor
 
 ## Current Status:
 
+* 2022-10-31 - xrobau slightly later added genintermediate (run `make intermediate` first)
 * 2022-10-31 - xrobau copied-and-pasted a bunch of stuff. It generates a root certificate.
 
 

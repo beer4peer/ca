@@ -121,13 +121,13 @@ fullname = @crl_url_section
 
 
 [ crl_url_section ]
-URI.1 = https://stir.tel/crl/stirtel.crl
-URI.2 = https://alt.stir.tel/crl/stirtel.crl
+URI.1 = https://CHANGE.THIS/crl/b4p.crl
+URI.2 = https://ALSO.CHANGE.THIS/crl/b4p.crl
 
 [ ca_auth ]
-caIssuers;URI.1 = https://stir.tel/root.pem
-caIssuers;URI.2 = https://alt.stir.tel/root.pem
-caIssuers;email.3 = security@stir.tel
+caIssuers;URI.1 = https://CHANGE.THIS/root.pem
+caIssuers;URI.2 = https://ALSO.CHANGE.THIS/root.pem
+caIssuers;email.3 = this@xrob.au
 
 [ v3_intermediate_ca ]
 # Extensions for a typical intermediate CA (`man x509v3_config`).

@@ -1,0 +1,65 @@
+#!/bin/bash
+
+CODE="VOTE20221031"
+NAME="Used Car and VoIP Emporium"
+C="AU"
+O="Beer4Peer"
+CN="$CODE ($NAME)"
+
+BASEURL='https://foo.blah/ca'
+
+CLIENTDIR=intermed/${CODE}
+mkdir -p ${CLIENTDIR}
+PRIVKEY=${CLIENTDIR}/${CODE}.private.pem
+CSR=${CLIENTDIR}/${CODE}.csr.pem
+CERT=${CLIENTDIR}/${CODE}.crt
+
+SUBJECT="/CN=$CN/C=$C/O=Issued by $O"
+
+SIGNING=ca/intermediate/certs/intermediate.cert.pem
+
+function genCertUrl() {
+	local cert=$1
+	local ski=$(openssl x509 -noout -in $cert -pubkey | openssl asn1parse -strparse 23 -out - -noout | openssl dgst -c -sha1 | cut -d\  -f2)
+	local uuid=$(uuidgen --sha1 --namespace @url --name $ski)
+	echo $BASEURL/$uuid
+}
+
+function genReqUuid() {
+	local req=$1
+	local ski=$(openssl req -noout -in $req -pubkey | openssl asn1parse -strparse 23 -out - -noout | openssl dgst -c -sha1 | cut -d\  -f2)
+	local uuid=$(uuidgen --sha1 --namespace @url --name $ski)
+	echo $uuid
+}
+
+ISSUER=$(genCertUrl $SIGNING)
+
+set -x
+
+openssl ecparam -noout -name prime256v1 -genkey -out ${PRIVKEY} -outform PEM
+openssl req -config ca/openssl.conf -new -nodes -sha256 -key ${PRIVKEY} -out ${CSR} -subj "${SUBJECT}"
+
+THISUUID=$(genReqUuid ${CSR})
+
+cat > ${CLIENTDIR}/openssl.${CODE}.conf <<EOF
+.include ca/openssl.conf
+
+[ client_issuers ]
+caIssuers;URI.1 = $ISSUER
+caIssuers;email.2 = the@xrob.au
+
+[ client_altnames ]
+URI.1 = $BASEURL/${THISUUID}
+DNS.2 = ${THISUUID}.foo.blah
+
+[ tn_auth_list ]
+field1=EXP:0,IA5:${CODE}
+
+EOF
+
+openssl ca -name CA_intermed -config ${CLIENTDIR}/openssl.${CODE}.conf -extensions client_shaken_cert -days 91 -notext -in ${CSR} -out ${CERT} -rand_serial -batch
+
+
+
+
+
